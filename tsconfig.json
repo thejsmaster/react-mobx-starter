@@ -17,6 +17,6 @@
     "noEmit": true,
     "jsx": "react-jsx"
   },
-  "include": ["src", "CreateComponentPlugin.js", "prettierrc.js"],
+  "include": ["src", "CreateComponentPlugin.js", "prettierrc.js", "vite-env.d.ts", "vite-env.d.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
