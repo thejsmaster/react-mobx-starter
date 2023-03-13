@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import './App.scss';
 import CreateComponent from '../CreateComponent';
@@ -9,13 +9,19 @@ import { config } from '../Router/addRoutes';
 
 export const App = CreateComponent(() => {
   const [routeConfig, setConfig] = useState(config);
-  const [loggedInUserRoles, setLoggedInUserRoles] = useState(['admin']);
+  const [loggedInUserRoles, setLoggedInUserRoles] = useState<string[]>([]);
+
+  useEffect(() => {
+    setLoggedInUserRoles(['admin']);
+  }, []);
+
   console.log(routeConfig);
   return (
     <div id="app">
       app
       <Link href="/counter">Counter</Link>
-      <CustomRouter config={routeConfig} loggedInUserRoles={loggedInUserRoles} />
+      <Link href="/user/10/age/30">User</Link>
+      {loggedInUserRoles.length && <CustomRouter config={routeConfig} loggedInUserRoles={loggedInUserRoles} />}
     </div>
   );
 });

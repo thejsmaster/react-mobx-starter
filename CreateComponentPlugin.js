@@ -12,7 +12,8 @@ export default function createComponentPlugin(options = {}) {
         !id.endsWith('main.tsx') &&
         !id.endsWith('CreateComponent.tsx') &&
         !id.endsWith('ErrorBoundary.tsx') &&
-        !id.endsWith('Router.tsx')
+        !id.endsWith('Router.tsx') &&
+        !id.endsWith('UnAuthorized.tsx')
       ) {
         console.log('vite plugin', id);
         if (!code.match(/^import CreateComponent from/m) || !code.match(/CreateComponent\(/m)) {

@@ -1,4 +1,4 @@
-import { makeAutoObservable } from "mobx";
+import { makeAutoObservable } from 'mobx';
 
 type UserInfo = {
   username?: string;
@@ -17,21 +17,27 @@ type UserAddress = {
 };
 
 export class AppState {
-  userInfo = { age: 3, email: "" };
+  userInfo = { age: 3, email: '' };
   validationErrors = {
-    email: "",
+    email: '',
   };
-  count = 0;
+  count = 1;
   constructor() {
     makeAutoObservable(this);
   }
 
   get ageBy10() {
-    console.log("age by 10");
+    console.log('age by 10');
     return this.userInfo.age * 10;
   }
+  setCount(v: number) {
+    this.count = v;
+  }
+  setAge(v: number) {
+    this.userInfo.age = v;
+  }
   incrementAge() {
-    console.log("incr age");
+    console.log('incr age');
     this.userInfo.age++;
   }
   increment() {

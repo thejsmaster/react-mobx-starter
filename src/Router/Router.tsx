@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, Route } from 'wouter';
+import { Unauthorized } from '../App/UnAuthorized';
 import { config, Config, RouteConfig } from './addRoutes';
 
 interface Props {
@@ -9,25 +10,14 @@ interface Props {
 
 export const CustomRouter: React.FC<Props> = ({ config, loggedInUserRoles }) => {
   const { routes } = config;
-  // const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  // // Check if the user is logged in
-  // if (!isLoggedIn) {
-  //   return <Link href="/login">Login</Link>;
-  // }
-
-  // Check if the user is authorized to access the route
   const isAuthorized = (allowedRoles: string[]) => {
     return allowedRoles.some((role) => loggedInUserRoles.includes(role));
   };
-
   return (
     <>
       {routes.map(({ path, Component, allowedForRoles }) => (
         <Route key={path} path={path}>
-          {(params) =>
-            isAuthorized(allowedForRoles) ? <Component {...params} /> : <Link href="/unauthorized">Unauthorized</Link>
-          }
+          {(params) => (isAuthorized(allowedForRoles) ? <Component {...params} /> : <Unauthorized />)}
         </Route>
       ))}
     </>

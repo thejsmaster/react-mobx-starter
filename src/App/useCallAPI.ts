@@ -1,18 +1,22 @@
 import { useState, useEffect } from 'react';
 import { createApiCallFunction, ApiCallResult } from './CallAPI';
 
-type ApiParams = {
+export type ApiParams = {
   url: string;
   payload?: any;
   type?: 'GET' | 'POST' | 'PUT' | 'DELETE';
   headers?: Record<string, string>;
+  autoLoad?: boolean;
+  callOnMount?: boolean;
 };
 
-const useApiCall = ({
+export const useFetch = ({
   url,
   payload,
   headers,
   type,
+  autoLoad = false,
+  callOnMount = false,
 }: ApiParams): {
   isLoading: boolean;
   isSuccess: boolean;
@@ -33,31 +37,45 @@ const useApiCall = ({
     isCancelled: false,
   });
   const [apiCall, setAPICall] = useState<any>(null);
+  const [makeInitialCall, setMakeInitialCall] = useState(callOnMount);
   useEffect(() => {
     setAPICall(createApiCallFunction());
   }, []);
-
   useEffect(() => {
     if (apiCall) {
-      apiCall.start(url, type, payload, headers);
       const onChange = (apiResult: ApiCallResult) => setResult(apiResult);
       apiCall.onChange(onChange);
-      console.log('usefeect out');
+      if (makeInitialCall) {
+        load();
+      }
+      return () => {
+        apiCall?.removeListener(onChange);
+        cancel();
+      };
+    }
+  }, [apiCall]);
+  useEffect(() => {
+    if (apiCall && autoLoad) {
+      cancel();
+      load();
 
       return () => {
-        console.log('use effect code cleaning');
-        apiCall.cancel();
-        apiCall.removeListener(onChange);
+        result.isLoading && apiCall.cancel();
       };
     }
   }, [url, payload, headers, type]);
 
   const load = () => {
-    apiCall?.start(url, type, payload, headers);
+    if (apiCall) {
+      cancel();
+      apiCall.start(url, type, payload, headers);
+    } else {
+      setMakeInitialCall(true);
+    }
   };
 
   const cancel = () => {
-    apiCall?.cancel();
+    result.isLoading && apiCall?.cancel();
   };
 
   return {
@@ -71,5 +89,3 @@ const useApiCall = ({
     cancel,
   };
 };
-
-export default useApiCall;

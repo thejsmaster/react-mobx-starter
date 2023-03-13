@@ -23,6 +23,7 @@
     "react-query": "^3.39.3",
     "react-router": "^6.9.0",
     "react-router-dom": "^6.9.0",
+    "use-fetch-react-xhr": "^2.0.0",
     "vite-plugin-eslint": "^1.8.1",
     "wouter": "^2.10.0"
   },

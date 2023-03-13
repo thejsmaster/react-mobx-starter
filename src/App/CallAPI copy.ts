@@ -15,43 +15,36 @@ type ApiCallOptions = {
 };
 
 type StartFunction = (url: string, type?: string, payload?: any, headers?: Record<string, string>) => void;
-type RequestParams = {
-  url: string;
-  type?: string;
-  payload?: any;
-  headers?: Record<string, string>;
-};
-
-const MIN_REQUEST_DELAY = 50;
 
 export const createApiCallFunction = () => {
-  let listener: any = null;
-  let request: XMLHttpRequest | any;
+  console.log('in create api call ');
+  let listeners: any[] = [];
+  let request: XMLHttpRequest | undefined | any;
   let isCancelled = false;
-  let lastRequestParams: RequestParams | undefined;
-  let lastRequestTime = 0;
-  let requestStatus = { status: 'idle', isLoading: false, isSuccess: false, isError: false, isCancelled: false };
-
-  const notifyListener = (result: ApiCallResult) => {
+  let requestStatus = { status: 'loading', isLoading: true, isSuccess: false, isError: false, isCancelled: false };
+  const notifyListeners = (result: ApiCallResult) => {
     if (result) {
       requestStatus = result;
     }
-    if (listener) {
-      listener(requestStatus);
-    }
+    listeners.forEach((listener) => {
+      listener(result);
+    });
   };
 
   const start: StartFunction = (url, type = 'GET', payload, headers = {}) => {
-    const now = Date.now();
-    const requestParams: RequestParams = { url, type, payload, headers };
-
-    if (request && now - lastRequestTime < MIN_REQUEST_DELAY && isEqual(requestParams, lastRequestParams)) {
-      // Ignore this request
-      return;
+    if (request) {
+      request.abort();
+      isCancelled = true;
+      // onCancel && onCancel();
+      notifyListeners({
+        status: 'cancelled',
+        isLoading: false,
+        isSuccess: false,
+        isError: false,
+        isCancelled: true,
+      });
     }
 
-    lastRequestParams = requestParams;
-    lastRequestTime = now;
     isCancelled = false;
     request = new XMLHttpRequest();
     request.open(type, url, true);
@@ -70,7 +63,8 @@ export const createApiCallFunction = () => {
       if (request.readyState === 4) {
         if (request.status >= 200 && request.status < 300) {
           const response = JSON.parse(request.responseText);
-          notifyListener({
+          //  onSuccess && onSuccess(response);
+          notifyListeners({
             status: 'success',
             data: response,
             isLoading: false,
@@ -83,7 +77,8 @@ export const createApiCallFunction = () => {
             status: request.status,
             message: request.statusText,
           };
-          notifyListener({
+          // onError && onError(error);
+          notifyListeners({
             status: 'error',
             error,
             isLoading: false,
@@ -95,23 +90,22 @@ export const createApiCallFunction = () => {
       }
     };
 
-    // setTimeout(() => {
     request.send(payload);
-    notifyListener({
+    notifyListeners({
       status: 'loading',
       isLoading: true,
       isSuccess: false,
       isError: false,
       isCancelled: false,
     });
-    // }, MIN_REQUEST_DELAY);
   };
 
   const cancel = () => {
     if (request && requestStatus.isLoading) {
       request.abort();
       isCancelled = true;
-      notifyListener({
+      //onCancel && onCancel();
+      notifyListeners({
         status: 'cancelled',
         isLoading: false,
         isSuccess: false,
@@ -121,12 +115,12 @@ export const createApiCallFunction = () => {
     }
   };
 
-  const removeListener = () => {
-    listener = null;
+  const removeListener = (listener: any) => {
+    listeners = listeners.filter((l) => l !== listener);
   };
 
-  const onChange = (newListener: any) => {
-    listener = newListener;
+  const onChange = (listener: any) => {
+    listeners.push(listener);
   };
 
   return {
@@ -136,7 +130,3 @@ export const createApiCallFunction = () => {
     removeListener,
   };
 };
-
-function isEqual(a: any, b: any) {
-  return JSON.stringify(a) === JSON.stringify(b);
-}
