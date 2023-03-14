@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, Route } from 'wouter';
-import { Unauthorized } from '../App/UnAuthorized';
+import { Unauthorized } from '../Components/UnAuthorized';
 import { config, Config, RouteConfig } from './addRoutes';
 
 interface Props {

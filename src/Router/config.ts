@@ -1,4 +1,4 @@
-import { Counter } from '../Counter/Counter';
+import { Counter } from '../Components/App/Counter/Counter';
 
 export const ROLES = {
   admin: 'admin',
@@ -10,9 +10,6 @@ export const counterRouteConfig = {
   allowedForRoles: [ROLES.admin],
   buildPath: () => {
     return '/counter';
-  },
-  navigate(replace: boolean = false) {
-    replace ? history.replaceState(null, this.buildPath()) : history.pushState(null, this.buildPath());
   },
 };
 
