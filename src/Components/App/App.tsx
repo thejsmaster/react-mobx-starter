@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import './App.scss';
 import CreateComponent from '../../CreateComponent';
-
+import { useCache } from '../../utils/Cache';
 import { Link } from 'wouter';
 import CustomRouter from '../../Router/Router';
 import { config } from '../../Router/addRoutes';
@@ -11,7 +11,9 @@ import { ROLES } from '../../Router/config';
 
 export const App = CreateComponent(() => {
   const [routeConfig, setConfig] = useState(config);
+
   const loggedInUserRoles = loggedInUserDetails?.userInfo?._userRoles;
+
   useEffect(() => {
     loggedInUserDetails.set_userInfo({ username_: 'testuser', email_: 'test@test.com', _userRoles: [ROLES.admin] });
     // make an api call to set the user roles or the user info

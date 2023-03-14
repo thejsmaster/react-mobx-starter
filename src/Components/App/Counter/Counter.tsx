@@ -6,15 +6,18 @@ import { useLocation } from 'wouter';
 import { userRouteConfig } from '../../../Router/config';
 import { usePathnames } from '../../../Router/usePathnames';
 import counterAPIEndpoint from '../../../ApiEndpoints/CounterApiEndpoints';
-import { useFetch } from 'use-fetch-react-xhr';
+
+import { useCache } from '../../../utils/Cache';
+import { useLocalFetch } from '../../../useLocalFetch';
 
 export const Counter = CreateComponent(() => {
   const [, navigate] = useLocation();
   const [, id, , age] = usePathnames();
   console.log(id, age);
+  const countCache = useCache({ count: appState.num_count });
 
-  const countAPI = useFetch(counterAPIEndpoint.get(appState.num_count));
-
+  const countAPI = useLocalFetch(counterAPIEndpoint.get(appState.num_count));
+  console.log('request', countAPI.request);
   // const { data, error, isLoading, isSuccess, isError, isCancelled, load, cancel } = CountAPI;
   useEffect(() => {
     if (id && age) {
@@ -29,13 +32,20 @@ export const Counter = CreateComponent(() => {
     countAPI.load();
     //counterRouteConfig.navigate();
   }, [appState.num_count]);
-
+  useEffect(() => {
+    console.log(countAPI.error);
+  }, [countAPI.error]);
   useEffect(() => {
     console.log("it's loading");
   }, [countAPI.isLoading]);
   useEffect(() => {
     console.log('age changed');
   }, [appState.num_ageBy10]);
+
+  const cacheCount = () => {
+    countCache.setState({ count: appState.num_count });
+  };
+
   return (
     <div>
       <Typography variant="h4" component="h4">
@@ -55,11 +65,12 @@ export const Counter = CreateComponent(() => {
         Age by 10: <div>{appState.num_ageBy10}</div>
       </div>
       <Button onClick={() => countAPI.cancel()}>Cancel</Button>
+      <Button onClick={cacheCount}> Cache Count: {countCache?.state?.count}</Button>
       count:
       {countAPI.isLoading && <CircularProgress />}
       {countAPI.isCancelled && !countAPI.isLoading && <div>it's cancelled</div>}
       {countAPI.isSuccess && !countAPI.isLoading && <div>{countAPI.data.title}</div>}
-      {countAPI.error && <div>error occured</div>}
+      {countAPI.error && <div style={{ color: 'red' }}>{countAPI.error?.message}</div>}
     </div>
   );
 });
